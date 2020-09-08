@@ -15,3 +15,16 @@
               ) last
        ) final
     LIMIT 100
+SELECT userid,timestamp_1,new_session,last_event
+      FROM (
+        SELECT *,
+              CASE WHEN datediff(to_date(timestamp_1), to_date(last_event)) >= (30) 
+                     OR last_event IS NULL 
+                   THEN 1 ELSE 0 END AS new_session
+         FROM (
+              SELECT userid,
+                     timestamp_1,
+                     LAG(timestamp_1,1) OVER (PARTITION BY userid ORDER BY timestamp_1) AS last_event
+                FROM upgdevdb1.hiveclickdata1
+              ) last
+       ) final;
